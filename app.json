@@ -1,32 +1,7 @@
 {
-  "name": "BioMuteBot",
-  "description": "A Telegram bot that mutes users who have links or usernames in their bio or messages.",
-  "repository": "https://github.com/yourusername/biomutebot", 
-  "logo": "https://telegra.ph/file/95db38cf818d1c3aa68a7.jpg",
-  "keywords": ["telegram", "bot", "python", "group", "mute", "moderation"],
-  "env": {
-    "BOT_TOKEN": {
-      "description": "Your bot's token from BotFather",
-      "required": true
-    },
-    "OWNER_ID": {
-      "description": "Your Telegram user ID (bot owner)",
-      "required": true
-    }
-  },
-  "buildpacks": [
-    {
-      "url": "heroku/python"
-    }
-  ],
-  "formation": {
-    "worker": {
-      "quantity": 1,
-      "size": "free"
-    }
-  },
-  "addons": [],
-  "scripts": {
-    "postdeploy": "echo Bot deployed successfully!"
-  }
+  "BOT_TOKEN": "PASTE_YOUR_BOT_TOKEN_HERE",
+  "OWNER_ID": 123456789,
+  "SUDO_IDS": [111111111, 222222222],
+  "MUTE_HOURS": 6,
+  "UPDATE_CHANNEL": "@biomute_bot"
 }
