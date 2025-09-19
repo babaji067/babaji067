@@ -1,11 +1,26 @@
-<h2 align="center">
-    ──「 Bɪᴏ ʟɪɴᴋ 」──
-</h2>
-<h3 align="center">──「 ʀᴇᴘᴏ sᴛᴀᴛs 」──</h3>
-<a href="https://github.com/babaji067/Biolink"><img src="https://github-readme-stats.vercel.app/api/pin/?username=babaji067&repo=Biolink&theme=chartreuse-dark"></a>
+# BioMuteBot
 
-<h3 align="center">
-    ─「 ᴅᴇᴩʟᴏʏ ᴏɴ ʜᴇʀᴏᴋᴜ 」─
-</h3>
+🤖 A Telegram bot that mutes users if they have links in their bio, name, or messages.  
+Built with [python-telegram-bot](https://python-telegram-bot.org).
 
-<p align="center"><a href="https://dashboard.heroku.com/new?template=https://github.com/babaji067/Biolink"> <img src="https://img.shields.io/badge/Deploy%20On%20Heroku-black?style=for-the-badge&logo=heroku" width="220" height="38.45"/></a></p>
+## Features
+- Auto mute if link found in bio, name, or messages
+- 3 warnings → 4th time mute
+- Welcome message with buttons
+- Broadcast, status, set mute duration, restart
+
+---
+
+## 🚀 Deploy to Heroku
+
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/babaji067/babaji067)
+
+---
+
+## Manual Deploy
+1. Fork or Clone this repo  
+2. Add config vars in Heroku:  
+   - `BOT_TOKEN`  
+   - `OWNER_ID`  
+   - `UPDATE_CHANNEL`  
+3. Deploy with:
