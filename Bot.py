@@ -1,215 +1,220 @@
 import os
 import re
+import asyncio
 import logging
-import nest_asyncio
-from datetime import datetime, timedelta
+from datetime import timedelta, datetime
 from telegram import (
-    Update, ChatPermissions, InlineKeyboardButton,
-    InlineKeyboardMarkup, InputFile
+    Update, ChatPermissions, InlineKeyboardButton, InlineKeyboardMarkup
 )
 from telegram.ext import (
     ApplicationBuilder, CommandHandler, MessageHandler,
-    CallbackQueryHandler, ContextTypes, filters
+    filters, ContextTypes, CallbackQueryHandler
 )
+from config import *
 
-# ========== CONFIG ==========
-BOT_TOKEN = os.environ.get("BOT_TOKEN")
-OWNER_ID = int(os.environ.get("OWNER_ID"))
-UPDATE_CHANNEL = os.environ.get("UPDATE_CHANNEL", None)
-
-SUDO_USERS = set()  # Dynamic sudo system
-
-USERS, GROUPS, WARNS = {}, {}, {}
-MUTE_HOURS = 4  # Default mute duration
-
-# ========== LOGGING ==========
+# ---------------- LOGGING ----------------
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     level=logging.INFO
 )
 
-nest_asyncio.apply()
+# ---------------- DATABASES ----------------
+USERS, GROUPS, WARNINGS = set(), set(), {}
 
-# ========== HELPERS ==========
-def is_sudo(uid: int) -> bool:
-    return uid == OWNER_ID or uid in SUDO_USERS
+# ---------------- HELPERS ----------------
+def link_detected(text):
+    return bool(re.search(r"(https?://|t\.me|telegram\.me|\.com|\.in)", text, re.IGNORECASE))
 
-async def force_join(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if UPDATE_CHANNEL:
-        try:
-            member = await context.bot.get_chat_member(UPDATE_CHANNEL, update.effective_user.id)
-            if member.status in ["left", "kicked"]:
-                btn = InlineKeyboardMarkup(
-                    [[InlineKeyboardButton("📢 Join Update Channel", url=f"https://t.me/{UPDATE_CHANNEL}")]]
-                )
-                await update.message.reply_text(
-                    "⚠️ पहले Update Channel Join करो फिर bot use कर पाओगे!",
-                    reply_markup=btn
-                )
-                return False
-        except Exception as e:
-            logging.warning(f"Force join error: {e}")
-    return True
+def owner_only(func):
+    async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        user_id = update.effective_user.id
+        if user_id not in [OWNER_ID] + SUDO_USERS:
+            await update.message.reply_text("⛔ This command is reserved for the bot owner and sudo users only.")
+            return
+        return await func(update, context)
+    return wrapper
 
-async def mute_user(chat_id, user_id, context, reason="Link detected"):
-    until = datetime.now() + timedelta(hours=MUTE_HOURS)
-    await context.bot.restrict_chat_member(
-        chat_id,
-        user_id,
-        ChatPermissions(can_send_messages=False),
-        until_date=until
-    )
-    btn = InlineKeyboardMarkup([
-        [InlineKeyboardButton("🔓 Unmute Me", url=f"https://t.me/{context.bot.username}")],
-        [InlineKeyboardButton("📢 Update Channel", url=f"https://t.me/{UPDATE_CHANNEL}")]
-    ])
-    return btn
-
-# ========== MAIN COMMANDS ==========
+# ---------------- START ----------------
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not await force_join(update, context): return
-    USERS[update.effective_user.id] = True
-    if update.effective_chat.type in ["group", "supergroup"]:
-        GROUPS[update.effective_chat.id] = True
+    user = update.effective_user
+    USERS.add(user.id)
+    keyboard = [
+        [InlineKeyboardButton("🔗 Join Update Channel", url=f"https://t.me/{UPDATE_CHANNEL.replace('@', '')}")],
+        [InlineKeyboardButton("🤖 Add Me to Your Group", url=f"https://t.me/{context.bot.username}?startgroup=true")]
+    ]
+    caption = (
+        f"🌐 Hey {user.first_name}!\n"
+        f"Welcome aboard to **Bio Mute Bot** ⚡\n\n"
+        f"I’m your personal group guardian — keeping chats clean & calm 😎"
+    )
+    if update.message.chat.type == "private":
+        await update.message.reply_photo(photo=WELCOME_PHOTO, caption=caption, reply_markup=InlineKeyboardMarkup(keyboard))
 
-    btn = InlineKeyboardMarkup([
-        [InlineKeyboardButton("🤖 Add Me To Group", url=f"https://t.me/{context.bot.username}?startgroup=true")],
-        [InlineKeyboardButton("📢 Update Channel", url=f"https://t.me/{UPDATE_CHANNEL}")]
-    ])
-    photo_path = "welcome.jpg"
-    if os.path.exists(photo_path):
-        await update.message.reply_photo(InputFile(photo_path), caption=f"👋 Welcome {update.effective_user.first_name}!", reply_markup=btn)
-    else:
-        await update.message.reply_text(f"👋 Welcome {update.effective_user.first_name}!", reply_markup=btn)
-
+# ---------------- FILTER LINKS ----------------
 async def check_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    msg = update.message
-    user = msg.from_user
-    if re.search(r"(t\.me/|http|www\.|@)", msg.text or ""):
-        await msg.delete()
-        count = WARNS.get(user.id, 0) + 1
-        WARNS[user.id] = count
-        if count >= 4:
-            btn = await mute_user(msg.chat_id, user.id, context)
-            await msg.reply_text(f"🔇 {user.mention_html()} Muted {MUTE_HOURS} hours (reason: link)", parse_mode="HTML", reply_markup=btn)
+    message = update.effective_message
+    user = update.effective_user
+    chat = update.effective_chat
+
+    if not message.text:
+        return
+
+    if link_detected(message.text):
+        await message.delete()
+        WARNINGS.setdefault(user.id, 0)
+        WARNINGS[user.id] += 1
+
+        if WARNINGS[user.id] < 4:
+            await chat.send_message(f"🚨 Hold on {user.mention_html()}!\nLinks aren’t allowed here 💥\nThat’s warning [{WARNINGS[user.id]} / 3] — stay clean 😇", parse_mode="HTML")
         else:
-            await msg.reply_text(f"⚠️ {user.mention_html()} Warning {count}/3 (reason: link)", parse_mode="HTML")
+            WARNINGS[user.id] = 0
+            until_date = datetime.now() + timedelta(hours=MUTE_HOURS)
+            await chat.restrict_member(user.id, permissions=ChatPermissions(can_send_messages=False), until_date=until_date)
+            await chat.send_message(
+                f"🔇 {user.mention_html()} has been muted for {MUTE_HOURS} hours ⚙️",
+                parse_mode="HTML",
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton("🔄 Update Channel", url=f"https://t.me/{UPDATE_CHANNEL.replace('@','')}")],
+                    [InlineKeyboardButton("🔓 Unmute Me", url=f"https://t.me/{context.bot.username}")]
+                ])
+            )
+            try:
+                await context.bot.send_message(
+                    user.id,
+                    f"🔇 You’ve been muted for {MUTE_HOURS} hours in {chat.title} 💬\nReason: Link sharing 🌐",
+                    reply_markup=InlineKeyboardMarkup([
+                        [InlineKeyboardButton("🔄 Update Channel", url=f"https://t.me/{UPDATE_CHANNEL.replace('@','')}")],
+                        [InlineKeyboardButton("🔓 Unmute Me", url=f"https://t.me/{context.bot.username}")]
+                    ])
+                )
+            except:
+                pass
+            await context.bot.send_message(
+                LOG_CHANNEL,
+                f"🚫 {user.mention_html()} muted in <b>{chat.title}</b> for link sharing ⚠️",
+                parse_mode="HTML"
+            )
 
-# ========== OWNER/SUDO COMMANDS ==========
+# ---------------- OWNER COMMANDS ----------------
+@owner_only
 async def broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not is_sudo(update.effective_user.id): return
-    if not context.args:
-        return await update.message.reply_text("Usage: /broadcast <message>")
-    text = " ".join(context.args)
-    sent, failed = 0, 0
-    for uid in list(USERS.keys()) + list(GROUPS.keys()):
+    if not context.args and not update.message.reply_to_message:
+        await update.message.reply_text("Usage: Reply or `/broadcast <message>`")
+        return
+
+    text = update.message.text.split(None, 1)[1] if len(context.args) else update.message.reply_to_message.text
+    sent_user = 0
+    sent_group = 0
+
+    for user_id in list(USERS):
         try:
-            await context.bot.send_message(uid, text)
-            sent += 1
+            await context.bot.send_message(user_id, text)
+            sent_user += 1
         except:
-            failed += 1
-    await update.message.reply_text(f"📢 Broadcast Done\n✅ Sent: {sent}\n❌ Failed: {failed}")
+            USERS.discard(user_id)
+    for group_id in list(GROUPS):
+        try:
+            await context.bot.send_message(group_id, text)
+            sent_group += 1
+        except:
+            GROUPS.discard(group_id)
 
+    await update.message.reply_text(f"📣 Broadcast Done!\n✅ Users: {sent_user}\n✅ Groups: {sent_group}")
+
+@owner_only
 async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not is_sudo(update.effective_user.id): return
-    await update.message.reply_text(f"👥 Users: {len(USERS)}\n👥 Groups: {len(GROUPS)}")
+    await update.message.reply_text(
+        f"📊 **System Vitals**\n\n"
+        f"👥 Users Connected – {len(USERS)}\n"
+        f"💬 Groups Linked – {len(GROUPS)}\n"
+        f"⚙️ Mode – Ultra Fast ⚡",
+        parse_mode="Markdown"
+    )
 
+@owner_only
 async def ping(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not is_sudo(update.effective_user.id): return
     start = datetime.now()
-    m = await update.message.reply_text("🏓 Pong...")
+    msg = await update.message.reply_text("🏓 Pong!")
     end = datetime.now()
-    latency = (end - start).microseconds // 1000
-    await m.edit_text(f"🏓 Pong: {latency} ms")
+    ms = (end - start).microseconds / 1000
+    await msg.edit_text(f"🏓 Pong! Response Speed: {int(ms)} ms ⚡")
 
+@owner_only
 async def restart(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not is_sudo(update.effective_user.id): return
-    await update.message.reply_text("♻️ Restarting...")
-    os.execl(sys.executable, sys.executable, *sys.argv)
+    await update.message.reply_text("♻️ System rebooting... Please wait ⚙️")
+    os.execv(sys.executable, ['python'] + sys.argv)
 
-async def leave(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not is_sudo(update.effective_user.id): return
-    await update.message.reply_text("👋 Leaving this group...")
-    await context.bot.leave_chat(update.effective_chat.id)
-
-async def addsudo(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.effective_user.id != OWNER_ID: return
+@owner_only
+async def setmute(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global MUTE_HOURS
     if not context.args:
-        return await update.message.reply_text("Usage: /addsudo <user_id>")
-    uid = int(context.args[0])
-    SUDO_USERS.add(uid)
-    await update.message.reply_text(f"✅ Added {uid} as SUDO")
+        await update.message.reply_text("Usage: /setmute <hours>")
+        return
+    MUTE_HOURS = int(context.args[0])
+    await update.message.reply_text(f"🕓 Default mute time set to {MUTE_HOURS} hours ⚡")
 
+# ---------------- ADMIN PANEL ----------------
+@owner_only
 async def baba(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not is_sudo(update.effective_user.id): return
-    text = """
-📌 Available Commands:
-/broadcast <msg>
-/status
-/ping
-/restart
-/banall
-/unbanall
-/kickall
-/leave
-/addsudo <id>
-    """
-    await update.message.reply_text(text)
+    await update.message.reply_text(
+        "👑 **Admin Command Panel**\n\n"
+        "/banall <group_id> – Ban everyone ⚔️\n"
+        "/kickall <group_id> – Kick all members 💨\n"
+        "/unbanall <group_id> – Clear bans 🔄\n"
+        "/leave <group_id> – Exit a group 👋\n"
+        "/addsudo <user_id> – Grant power ⚡",
+        parse_mode="Markdown"
+    )
 
-# ========== GROUP ADMIN ACTIONS ==========
+# ---------------- BAN/KICK ----------------
+@owner_only
 async def banall(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not is_sudo(update.effective_user.id): return
-    chat = update.effective_chat
-    async for member in context.bot.get_chat_administrators(chat.id):
-        admin_ids = [a.user.id for a in await context.bot.get_chat_administrators(chat.id)]
-        async for member in context.bot.get_chat_members(chat.id):
-            if member.user.id not in admin_ids:
-                try:
-                    await context.bot.ban_chat_member(chat.id, member.user.id)
-                except: pass
-    await update.message.reply_text("✅ All non-admins banned.")
+    if not context.args:
+        await update.message.reply_text("Usage: /banall <group_id>")
+        return
+    gid = int(context.args[0])
+    members = await context.bot.get_chat_administrators(gid)
+    for m in members:
+        if not m.user.is_bot:
+            try:
+                await context.bot.ban_chat_member(gid, m.user.id)
+            except:
+                pass
+    await update.message.reply_text(f"⚔️ All members banned in {gid}")
 
-async def unbanall(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not is_sudo(update.effective_user.id): return
-    chat = update.effective_chat
-    banned = await context.bot.get_chat_administrators(chat.id)
-    for u in banned:
-        try: await context.bot.unban_chat_member(chat.id, u.user.id)
-        except: pass
-    await update.message.reply_text("✅ All unbanned.")
-
+@owner_only
 async def kickall(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not is_sudo(update.effective_user.id): return
-    chat = update.effective_chat
-    admin_ids = [a.user.id for a in await context.bot.get_chat_administrators(chat.id)]
-    async for member in context.bot.get_chat_members(chat.id):
-        if member.user.id not in admin_ids:
-            try: await context.bot.ban_chat_member(chat.id, member.user.id)
-            except: pass
-    await update.message.reply_text("✅ All non-admins kicked.")
+    if not context.args:
+        await update.message.reply_text("Usage: /kickall <group_id>")
+        return
+    gid = int(context.args[0])
+    async for member in context.bot.get_chat_administrators(gid):
+        if not member.user.is_bot:
+            try:
+                await context.bot.ban_chat_member(gid, member.user.id)
+                await asyncio.sleep(0.2)
+                await context.bot.unban_chat_member(gid, member.user.id)
+            except:
+                pass
+    await update.message.reply_text(f"💨 All members kicked in {gid}")
 
-# ========== MAIN ==========
+# ---------------- HANDLERS ----------------
 def main():
-    app = ApplicationBuilder().token(BOT_TOKEN).build()
+    app = ApplicationBuilder().token(TOKEN).build()
 
-    # Normal
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, check_message))
 
-    # Owner/Sudo
     app.add_handler(CommandHandler("broadcast", broadcast))
     app.add_handler(CommandHandler("status", status))
     app.add_handler(CommandHandler("ping", ping))
     app.add_handler(CommandHandler("restart", restart))
-    app.add_handler(CommandHandler("leave", leave))
-    app.add_handler(CommandHandler("addsudo", addsudo))
+    app.add_handler(CommandHandler("setmute", setmute))
     app.add_handler(CommandHandler("baba", baba))
-
-    # Group admin
     app.add_handler(CommandHandler("banall", banall))
-    app.add_handler(CommandHandler("unbanall", unbanall))
     app.add_handler(CommandHandler("kickall", kickall))
 
+    logging.info("🚀 Bio Mute Bot is now running!")
     app.run_polling()
 
 if __name__ == "__main__":
