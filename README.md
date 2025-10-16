@@ -1,99 +1,54 @@
-# Bio Mute Bot
+# 🤖 Bio Mute Bot
 
-A sleek, powerful Telegram bot that protects your groups from unwanted links while offering admin features in an attractive English design.  
-
----
-
-## 🛡️ Features
-
-- Automatic detection and removal of **all types of links**  
-- Three warnings, then **mute for custom hours**  
-- Inline buttons: “🔄 Update Channel” & “🔓 Unmute Me”  
-- Commands visible to all, but usable **only by Owner/Sudo**  
-- Admin panel (`/baba`) reveals:  
-  - `/banall <group_id>` — ban all members  
-  - `/kickall <group_id>` — kick all members  
-  - `/unbanall <group_id>` — unban banned users  
-  - `/leave <group_id>` — bot leaves the group  
-  - `/addsudo <user_id>` — grant sudo permission  
-- Essential commands for general users too:  
-  `/start`, `/broadcast`, `/status`, `/ping`, `/restart`, `/setmute`  
-- Logs all moderation actions to a dedicated log group
+A stylish and powerful Telegram bot that automatically moderates messages, removes link spam, and offers advanced admin tools — all with a beautiful, fast, and smooth design.  
 
 ---
 
-## ⚙️ Setup & Deployment (Heroku / Local)
+## ✨ **Key Features**
 
-1. Fork this repo or clone it  
-2. Create a `config.py` file with content like:
-
-    ```python
-    TOKEN = "YOUR_BOT_TOKEN"
-    OWNER_ID = 123456789
-    SUDO_USERS = [OWNER_ID, 987654321]
-    UPDATE_CHANNEL = "@YourUpdateChannel"
-    LOG_CHANNEL = -1001234567890
-    MUTE_HOURS = 6
-    WELCOME_PHOTO = "https://telegra.ph/file/56b7d7c8d1b0f8f3c43f5.jpg"
-    ```
-
-3. Install dependencies:
-
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-4. For Heroku deployment:
-   - Add the following **Config Vars**:
-     - `TOKEN`
-     - `OWNER_ID`
-     - `SUDO_USERS`
-     - `UPDATE_CHANNEL`
-     - `LOG_CHANNEL`
-   - Deploy the repo  
-   - Make sure `Procfile` and `runtime.txt` are present
-
-5. Run locally (for testing):
-    ```bash
-    python bot.py
-    ```
+- 🔗 Detects **all types of links** in bio or messages  
+- ⚠️ 3 warnings → then automatic **custom hour mute**  
+- 🧊 Mute message includes **Update Channel + Unmute Me** buttons  
+- 🖼️ Attractive photo welcome message on /start  
+- 📢 Full broadcast support — photo, text, reply, or link  
+- ⚙️ Owner & Sudo-only commands panel (`/baba`)  
+- 🧮 Auto database cleanup — removes left users/groups  
+- ⚡ Fast, lightweight, and Heroku-ready  
 
 ---
 
-## 📌 Commands & Usage
+## 🧩 **Commands Overview**
 
 | Command | Description | Access |
-|---------|-------------|--------|
-| `/start` | Welcome message + join channel prompt | Everyone |
-| `/broadcast <message>` | Send message to all users & groups | Owner/Sudo only |
-| `/status` | Show user & group counts | Owner/Sudo only |
-| `/ping` | Bot response time | Owner/Sudo only |
-| `/restart` | Restart the bot | Owner/Sudo only |
-| `/setmute <hours>` | Set default mute duration | Owner/Sudo only |
-| `/baba` | Show admin panel | Owner/Sudo only |
-| `/banall <group_id>` | Ban all members in group | Owner/Sudo only |
-| `/kickall <group_id>` | Kick all members in group | Owner/Sudo only |
-| `/unbanall <group_id>` | Unban all from bans | Owner/Sudo only |
-| `/leave <group_id>` | Bot leaves the group | Owner/Sudo only |
-| `/addsudo <user_id>` | Grant sudo privileges | Owner/Sudo only |
+|----------|--------------|--------|
+| `/start` | Welcome message + join update channel button | Everyone |
+| `/broadcast` | Send message/photo/link to all users & groups | Owner / Sudo |
+| `/status` | Show total users & groups count | Owner / Sudo |
+| `/ping` | Check bot’s response speed (ms) | Owner / Sudo |
+| `/restart` | Restart the bot | Owner / Sudo |
+| `/setmute <hours>` | Change default mute duration | Owner / Sudo |
+| `/baba` | Show admin panel (banall, kickall, etc.) | Owner / Sudo |
+| `/banall <group_id>` | Ban all users in a group | Owner / Sudo |
+| `/kickall <group_id>` | Kick all non-admin users | Owner / Sudo |
+| `/unbanall <group_id>` | Unban all banned users | Owner / Sudo |
+| `/leave <group_id>` | Make bot leave the group | Owner / Sudo |
+| `/addsudo <user_id>` | Grant sudo access | Owner Only |
 
 ---
 
-## 💡 Tips & Notes
+## ⚙️ **Setup Guide**
 
-- Make sure the bot is an **administrator** in groups where it moderates  
-- The bot must have permission to delete messages and restrict users  
-- Log group should allow bot to post messages  
-- If a user is muted, they cannot send messages until mute expires  
-- Use `/baba` to access the powerful admin tools  
+### 🔧 Step 1: Create a Telegram Bot
+- Go to [@BotFather](https://t.me/BotFather)
+- Use `/newbot` → get your **BOT TOKEN**
 
----
-
-## 📜 License & Credits
-
-This project is open-source.  
-Feel free to modify, redistribute or use it in your own bots.  
-
----
-
-*Designed with 🔥 by [Your Name / @YourTelegram]*
+### 📂 Step 2: Create `config.py`
+Add your configuration in a file named `config.py`:
+```python
+TOKEN = "YOUR_BOT_TOKEN"
+OWNER_ID = 123456789
+SUDO_USERS = [OWNER_ID, 987654321]
+UPDATE_CHANNEL = "@YourUpdateChannel"
+LOG_CHANNEL = -1001234567890
+MUTE_HOURS = 6
+WELCOME_PHOTO = "https://telegra.ph/file/56b7d7c8d1b0f8f3c43f5.jpg"
