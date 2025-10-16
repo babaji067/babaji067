@@ -1,31 +1,29 @@
 {
-  "name": "BioMuteBot",
-  "description": "A Telegram moderation bot with bio mute, broadcast, and group management features.",
-  "repository": "https://github.com/your-username/BioMuteBot",
-  "keywords": [
-    "telegram",
-    "bot",
-    "python",
-    "moderation",
-    "heroku"
-  ],
+  "name": "Bio Mute Bot",
+  "description": "A Telegram bot that mutes users who share links in messages or bios.",
+  "repository": "https://github.com/yourusername/BioMuteBot",
+  "logo": "https://telegra.ph/file/ea07b1e6b6d5c5a12b6b2.jpg",
+  "keywords": ["telegram", "bot", "mute", "bio", "anti-link"],
   "env": {
     "BOT_TOKEN": {
-      "description": "Your bot token from @BotFather",
+      "description": "Your Telegram bot token from BotFather",
       "required": true
     },
     "OWNER_ID": {
-      "description": "Telegram User ID of the bot owner",
+      "description": "Your Telegram numeric user ID",
       "required": true
     },
     "UPDATE_CHANNEL": {
-      "description": "Username of your update channel (without @)",
-      "required": false
+      "description": "Update channel username (with @)",
+      "required": true
+    },
+    "LOG_CHANNEL": {
+      "description": "Channel or group ID for logging actions",
+      "required": true
+    },
+    "MUTE_HOURS": {
+      "description": "Default mute duration in hours",
+      "value": "2"
     }
-  },
-  "buildpacks": [
-    {
-      "url": "heroku/python"
-    }
-  ]
+  }
 }
