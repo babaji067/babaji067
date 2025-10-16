@@ -1,54 +1,41 @@
-# 🤖 Bio Mute Bot
+# 🤖 BioMuteBot
 
-A stylish and powerful Telegram bot that automatically moderates messages, removes link spam, and offers advanced admin tools — all with a beautiful, fast, and smooth design.  
-
----
-
-## ✨ **Key Features**
-
-- 🔗 Detects **all types of links** in bio or messages  
-- ⚠️ 3 warnings → then automatic **custom hour mute**  
-- 🧊 Mute message includes **Update Channel + Unmute Me** buttons  
-- 🖼️ Attractive photo welcome message on /start  
-- 📢 Full broadcast support — photo, text, reply, or link  
-- ⚙️ Owner & Sudo-only commands panel (`/baba`)  
-- 🧮 Auto database cleanup — removes left users/groups  
-- ⚡ Fast, lightweight, and Heroku-ready  
+A smart Telegram bot that automatically **detects and mutes users** who share unwanted links, usernames, or spam messages in your groups.  
+Protect your community with style — built using **python-telegram-bot v20+** 💥
 
 ---
 
-## 🧩 **Commands Overview**
+## ✨ Features
 
-| Command | Description | Access |
-|----------|--------------|--------|
-| `/start` | Welcome message + join update channel button | Everyone |
-| `/broadcast` | Send message/photo/link to all users & groups | Owner / Sudo |
-| `/status` | Show total users & groups count | Owner / Sudo |
-| `/ping` | Check bot’s response speed (ms) | Owner / Sudo |
-| `/restart` | Restart the bot | Owner / Sudo |
-| `/setmute <hours>` | Change default mute duration | Owner / Sudo |
-| `/baba` | Show admin panel (banall, kickall, etc.) | Owner / Sudo |
-| `/banall <group_id>` | Ban all users in a group | Owner / Sudo |
-| `/kickall <group_id>` | Kick all non-admin users | Owner / Sudo |
-| `/unbanall <group_id>` | Unban all banned users | Owner / Sudo |
-| `/leave <group_id>` | Make bot leave the group | Owner / Sudo |
-| `/addsudo <user_id>` | Grant sudo access | Owner Only |
+- 🚫 Detects links in messages or bios  
+- ⚠️ Gives 3 warnings → then mutes on 4th offense  
+- 🔇 Custom mute duration via `/setmute`  
+- 💬 Private mute notifications to users  
+- 📢 `/broadcast` to groups + users (with support for reply messages)  
+- 🧑‍💻 Admin-only commands (ban/kick/restart/status)  
+- 🧾 Auto-remove inactive users/groups from cache  
+- ⚙️ Simple Heroku deploy setup  
 
 ---
 
-## ⚙️ **Setup Guide**
+## 🧩 Required Files
 
-### 🔧 Step 1: Create a Telegram Bot
-- Go to [@BotFather](https://t.me/BotFather)
-- Use `/newbot` → get your **BOT TOKEN**
+| File | Description |
+|------|--------------|
+| `bot.py` | Main bot file |
+| `config.py` | Stores your bot token, owner ID, etc. |
+| `requirements.txt` | Dependencies list |
+| `Procfile` | Heroku start command |
+| `runtime.txt` | Python version |
+| `app.json` | For Heroku deploy button |
+| `.env` *(optional)* | Local environment variables |
 
-### 📂 Step 2: Create `config.py`
-Add your configuration in a file named `config.py`:
-```python
-TOKEN = "YOUR_BOT_TOKEN"
-OWNER_ID = 123456789
-SUDO_USERS = [OWNER_ID, 987654321]
-UPDATE_CHANNEL = "@YourUpdateChannel"
-LOG_CHANNEL = -1001234567890
-MUTE_HOURS = 6
-WELCOME_PHOTO = "https://telegra.ph/file/56b7d7c8d1b0f8f3c43f5.jpg"
+---
+
+## ⚙️ Installation (Local)
+
+```bash
+git clone https://github.com/babaji067/babaji067.git
+cd babaji067
+pip install -r requirements.txt
+python bot.py
