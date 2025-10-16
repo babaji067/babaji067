@@ -1,20 +1,15 @@
 # 🤖 BioMuteBot
 
-A smart Telegram bot that automatically **detects and mutes users** who share unwanted links, usernames, or spam messages in your groups.  
-Protect your community with style — built using **python-telegram-bot v20+** 💥
+A smart Telegram bot that automatically **detects and mutes users** who share unwanted links or usernames in your group.  
+Protect your chats from spam and self-promo — all on auto-mode ⚡
 
 ---
 
-## ✨ Features
+## 🚀 Deploy to Heroku
 
-- 🚫 Detects links in messages or bios  
-- ⚠️ Gives 3 warnings → then mutes on 4th offense  
-- 🔇 Custom mute duration via `/setmute`  
-- 💬 Private mute notifications to users  
-- 📢 `/broadcast` to groups + users (with support for reply messages)  
-- 🧑‍💻 Admin-only commands (ban/kick/restart/status)  
-- 🧾 Auto-remove inactive users/groups from cache  
-- ⚙️ Simple Heroku deploy setup  
+You can deploy this bot to Heroku with one click below 👇
+
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/babaji067/babaji067)
 
 ---
 
@@ -22,17 +17,19 @@ Protect your community with style — built using **python-telegram-bot v20+** �
 
 | File | Description |
 |------|--------------|
-| `bot.py` | Main bot file |
-| `config.py` | Stores your bot token, owner ID, etc. |
-| `requirements.txt` | Dependencies list |
-| `Procfile` | Heroku start command |
-| `runtime.txt` | Python version |
-| `app.json` | For Heroku deploy button |
+| `bot.py` | Main bot script |
+| `config.py` | Stores token, owner ID, and channel details |
+| `requirements.txt` | Python dependencies |
+| `Procfile` | Start command for Heroku |
+| `runtime.txt` | Python version used |
+| `app.json` | Heroku app metadata |
 | `.env` *(optional)* | Local environment variables |
 
 ---
 
-## ⚙️ Installation (Local)
+## ⚙️ Local Setup (Optional)
+
+If you want to run it locally or in Pydroid3:
 
 ```bash
 git clone https://github.com/babaji067/babaji067.git
