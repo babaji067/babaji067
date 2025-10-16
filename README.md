@@ -44,7 +44,6 @@ A stylish and powerful Telegram bot that automatically moderates messages, remov
 
 ### 📂 Step 2: Create `config.py`
 Add your configuration in a file named `config.py`:
-
 ```python
 TOKEN = "YOUR_BOT_TOKEN"
 OWNER_ID = 123456789
