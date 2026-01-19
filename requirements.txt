@@ -1,2 +1,2 @@
 python-telegram-bot==20.7
-requests
+motor==3.3.2
