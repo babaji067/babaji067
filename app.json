@@ -1,29 +1,45 @@
 {
-  "name": "Bio Mute Bot",
-  "description": "A Telegram bot that mutes users who share links in messages or bios.",
-  "repository": "https://github.com/yourusername/BioMuteBot",
-  "logo": "https://telegra.ph/file/ea07b1e6b6d5c5a12b6b2.jpg",
-  "keywords": ["telegram", "bot", "mute", "bio", "anti-link"],
+  "name": "BioMuteBot",
+  "description": "Fast Telegram Bio & Link Mute Bot with MongoDB, Advanced Broadcast & Restart System",
+  "keywords": [
+    "telegram",
+    "bot",
+    "python",
+    "biomute",
+    "moderation",
+    "broadcast",
+    "mongodb"
+  ],
+  "repository": "https://github.com/yourusername/yourrepo",
   "env": {
     "BOT_TOKEN": {
-      "description": "Your Telegram bot token from BotFather",
-      "required": true
+      "description": "Telegram Bot Token from @BotFather",
+      "value": ""
     },
     "OWNER_ID": {
-      "description": "Your Telegram numeric user ID",
-      "required": true
+      "description": "Your Telegram User ID (numeric)",
+      "value": ""
     },
     "UPDATE_CHANNEL": {
-      "description": "Update channel username (with @)",
-      "required": true
+      "description": "Update channel username (with or without @)",
+      "value": "@YourChannel"
     },
-    "LOG_CHANNEL": {
-      "description": "Channel or group ID for logging actions",
-      "required": true
-    },
-    "MUTE_HOURS": {
-      "description": "Default mute duration in hours",
-      "value": "2"
+    "MONGO_URI": {
+      "description": "MongoDB connection URI (MongoDB Atlas recommended)",
+      "value": ""
     }
-  }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ],
+  "formation": {
+    "worker": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  },
+  "addons": [],
+  "stack": "heroku-22"
 }
