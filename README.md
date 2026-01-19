@@ -1,38 +1,30 @@
-# 🤖 BioMuteBot
+---
 
-A smart Telegram bot that automatically **detects and mutes users** who share unwanted links or usernames in your group.  
-Protect your chats from spam and self-promo — all on auto-mode ⚡
+<h2 align="center">🚀 Deployment Guide</h2>
+
+<p align="center">
+Choose your preferred deployment method below 👇  
+Both methods are fully supported & production-ready.
+</p>
 
 ---
 
-## 🚀 Deploy to Heroku
+<h3 align="center">🟣 Deploy on Heroku</h3>
 
-You can deploy this bot to Heroku with one click below 👇
+<p align="center">
+One-click deploy with automatic setup ⚡  
+Best for beginners & quick launch.
+</p>
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/babaji067/babaji067)
+<p align="center">
+<a href="https://dashboard.heroku.com/new?template=https://github.com/babaji067/babaji067">
+<img src="https://img.shields.io/badge/Deploy%20On%20Heroku-7056ff?style=for-the-badge&logo=heroku&logoColor=white" width="280"/>
+</a>
+</p>
 
----
-
-## 🧩 Required Files
-
-| File | Description |
-|------|--------------|
-| `bot.py` | Main bot script |
-| `config.py` | Stores token, owner ID, and channel details |
-| `requirements.txt` | Python dependencies |
-| `Procfile` | Start command for Heroku |
-| `runtime.txt` | Python version used |
-| `app.json` | Heroku app metadata |
-| `.env` *(optional)* | Local environment variables |
-
----
-
-## ⚙️ Local Setup (Optional)
-
-If you want to run it locally or in Pydroid3:
-
-```bash
-git clone https://github.com/babaji067/babaji067.git
-cd babaji067
-pip install -r requirements.txt
-python bot.py
+### 🔧 Required Heroku Config Vars
+```env
+BOT_TOKEN=your_bot_token
+OWNER_ID=your_telegram_user_id
+UPDATE_CHANNEL=@YourChannel
+MONGO_URI=mongodb+srv://user:pass@cluster/dbname
