@@ -11,7 +11,6 @@ from telegram import (
     InlineKeyboardButton,
     InlineKeyboardMarkup
 )
-from telegram.error import RetryAfter
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
@@ -160,15 +159,18 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await save_user(update.effective_user)
     await save_chat(update.effective_chat)
 
+    joined = False
     try:
         member = await context.bot.get_chat_member(
             f"@{UPDATE_CHANNEL}",
             update.effective_user.id
         )
-        if member.status not in ["member", "administrator", "creator"]:
-            raise Exception
+        joined = member.status in ["member", "administrator", "creator"]
     except:
-        return await update.message.reply_text(
+        joined = False
+
+    if not joined:
+        await update.message.reply_text(
             "📛 Please join the update channel first.",
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton(
@@ -177,6 +179,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 )]
             ])
         )
+        return
 
     await update.message.reply_text(
         "━━━ ✦ BIOMUTEBOT ✦ ━━━\n"
