@@ -1,39 +1,34 @@
 {
   "name": "BioMuteBot",
-  "description": "Fast Telegram Bio & Link Mute Bot with MongoDB, Advanced Broadcast & Restart System",
+  "description": "Telegram Bio Mute Bot with MongoDB, Broadcast system and Heroku support",
+  "repository": "https://github.com/yourusername/biomutebot",
+  "logo": "https://telegram.org/img/t_logo.png",
   "keywords": [
     "telegram",
     "bot",
+    "biomutebot",
+    "mongodb",
     "python",
-    "biomute",
-    "moderation",
-    "broadcast",
-    "mongodb"
+    "heroku"
   ],
-  "repository": "https://github.com/yourusername/yourrepo",
   "env": {
     "BOT_TOKEN": {
       "description": "Telegram Bot Token from @BotFather",
-      "value": ""
+      "required": true
     },
     "OWNER_ID": {
-      "description": "Your Telegram User ID (numeric)",
-      "value": ""
+      "description": "Telegram User ID of bot owner",
+      "required": true
     },
     "UPDATE_CHANNEL": {
-      "description": "Update channel username (with or without @)",
-      "value": "@YourChannel"
+      "description": "Telegram update channel username (without @)",
+      "required": true
     },
     "MONGO_URI": {
-      "description": "MongoDB connection URI (MongoDB Atlas recommended)",
-      "value": ""
+      "description": "MongoDB connection URI",
+      "required": true
     }
   },
-  "buildpacks": [
-    {
-      "url": "heroku/python"
-    }
-  ],
   "formation": {
     "worker": {
       "quantity": 1,
@@ -41,5 +36,10 @@
     }
   },
   "addons": [],
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ],
   "stack": "heroku-22"
 }
